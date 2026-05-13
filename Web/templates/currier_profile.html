@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="card p-4 mb-4 bg-light">
+        <h2 class="mb-3">Профиль курьера: {{ current_user.name }}</h2>
+        <p><strong>Email:</strong> {{ current_user.email }}</p>
+        <p><strong>Статус доступа:</strong> Доставка (Курьер)</p>
+        <p><strong>Всего заказов активно:</strong> <span class="badge bg-primary fs-6">{{ ncom_or }}</span></p>
+        <p><strong>Всего заказов выполнено:</strong> <span class="badge bg-primary fs-6">{{ com_or }}</span></p>
+  </div>
+
+{% endblock %}
