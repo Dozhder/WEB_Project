@@ -77,7 +77,7 @@ login_manager.init_app(app)
 
 # host
 HOST = '0.0.0.0'
-PORT = '5000'
+PORT = '80'
 
 
 @login_manager.user_loader
