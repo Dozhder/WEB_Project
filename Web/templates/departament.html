@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2 style="text-align: center">Department List</h2>
+  <div align="center">
+      <a href="/" class="btn btn-secondary">Back to Works</a>
+      <a href="/add_department" class="btn btn-secondary">Add Department</a>
+  </div>
+  {% for department in departments %}
+    <table align="center" style="table-layout: fixed; width: 70%; text-align: center">
+      <caption style="font-size: 48; caption-side: top; font-color: black; text-align: center">Action # {{ department.id }}</caption>
+      <thead>
+        <tr style="background-color: gray">
+          <th>Title of department</th>
+          <th>chief</th>
+          <th>Members</th>
+          <th>Department email</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="background-color: lightblue">
+          <td>{{ department.title }}</td>
+          <td>{{ department.user.surname }} {{department.user.name}}</td>
+          <td>{{ department.members }}</td>
+          <td>{{ department.email }}</td>
+        </tr>
+      </tbody>
+    </table>
+    {% if current_user.is_authenticated and current_user.id == (department.chief or 1) %}
+      <div align="center">
+          <a href="/edit_department/{{ department.id }}" class="btn btn-warning">
+              Edit Department
+          </a>
+          <a href="/delete_department/{{ department.id }}" class="btn btn-danger">
+              Delete Department
+          </a>
+      </div>
+    {% endif %}
+    <br>
+  {% endfor %}
+{% endblock %}

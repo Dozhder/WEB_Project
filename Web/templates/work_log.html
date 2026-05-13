@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2 style="text-align: center">Work List</h2>
+  <div align="center">
+      <a href="/add_work" class="btn btn-secondary">Add Work</a>
+      <a href="/department" class="btn btn-secondary">Department list</a>
+  </div>
+  {% for work in works %}
+    <table align="center" style="table-layout: fixed; width: 70%; text-align: center">
+      <caption style="font-size: 48; caption-side: top; font-color: black; text-align: center">Action # {{ work.id }}</caption>
+      <thead>
+        <tr style="background-color: gray">
+          <th>Title of activity</th>
+          <th>Team leader</th>
+          <th>Duration</th>
+          <th>List of collaborators</th>
+          <th>Hazard Category</th>
+          <th>Is finished</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="background-color: lightblue">
+          <td>{{ work.job }}</td>
+          <td>{{ work.team_leader }}</td>
+          <td>{{ work.work_size }}</td>
+          <td>{{ work.collaborators }}</td>
+          <td>{{ work.hazard }}</td>
+          {% if work.is_finished == True %}
+                <td style="background-color: #68de8a">is finished</td>
+          {% else %}
+                <td style="background-color: #9966cc">is not finished</td>
+          {% endif %}
+        </tr>
+      </tbody>
+    </table>
+    {% if current_user.is_authenticated and current_user.id == (work.team_leader or 1) %}
+      <div align="center">
+          <a href="/edit_work/{{ work.id }}" class="btn btn-warning">
+              Edit Work
+          </a>
+          <a href="/delete_work/{{ work.id }}" class="btn btn-danger">
+              Delete Work
+          </a>
+      </div>
+    {% endif %}
+    <br>
+  {% endfor %}
+{% endblock %}
