@@ -13,6 +13,13 @@
             <li>Нет товаров в заказе</li>
           {% endfor %}
         </ul>
+      {% if item.order.payment_type == 'cash'%}
+        <h4>Тип оплаты: Наличная оплата</h4>
+      {% else %}
+        <h4>Тип оплаты: Безналичная оплата</h4>
+      {% endif %}
+      <p>Стоимость заказа: {{ item.order.price }}</p>
+      <p>Сдача: {{ item.order.change }}</p>
       <br>
       <a href="/complete_order/{{ item.order.id }}"><button class="btn btn-success">Сдать заказ</button></a>
     </div>

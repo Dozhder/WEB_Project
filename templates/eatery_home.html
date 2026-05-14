@@ -3,12 +3,20 @@
 {% block content %}
   <h2 style="text-align: center">Новые заказы</h2>
   <div align="center">
+      <a href="/add_currier" class="btn btn-secondary">Создать аккаунт курьера</a>
+      <p></p>
       <a href="/add_product" class="btn btn-secondary">Добавить новый товар</a>
   </div>
+  <br>
   {% for item in orders_data %}
     <div align="center" style="border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; border-radius: 5px;">
       <h2>Номер заказа {{ item.order.id }}</h2>
-      <h3>Товары в заказе</h3>
+      {% if item.order.type =='delivery' %}
+        <h3>Тип: Доставка</h3>
+      {% else %}
+        <h3>Тип: Самовывоз</h3>
+      {% endif %}
+      <h4>Товары в заказе</h4>
         <ul style="text-align: left; display: inline-block;">
           {% for prod in item.products %}
             <li>{{ prod.name }}: {{ item.order.products[prod.id|string] }} |
@@ -18,7 +26,14 @@
             <li>Нет товаров в заказе</li>
           {% endfor %}
         </ul>
-      <p align="center">Price: {{ item.order.price }}</p>
+      {% if item.order.payment_type == 'cash' %}
+        <h4>Тип оплаты: Наличная оплата</h4>
+        <p align="center">Цена: {{ item.order.price }}</p>
+        <p align="center">Сдача: {{ item.order.change }}</p>
+      {% else %}
+        <h4>Тип оплаты: Безналичная оплата</h4>
+        <p align="center">Цена: {{ item.order.price }}</p>
+      {% endif %}
       <br>
       <div align="center">
         {% if item.order.type == "delivery" %}

@@ -23,13 +23,15 @@
                 </div>
             {% elif current_user.access == 2 %}
                 <div>
-                <a class="navbar-brand" href="/logout"><img src="https://cdn-icons-png.flaticon.com/512/12225/12225935.png" alt="Profile" width="50" height="50">
-                    {{ current_user.name }}</a>
+                    <p class="navbar-brand"><img src="https://cdn-icons-png.flaticon.com/512/12225/12225935.png" alt="Profile" width="50" height="50">
+                        {{ current_user.name }}</p>
+                    <a class="navbar-brand" href="/logout"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQO1jPMI9JA3ApI4yW6gpyFCoUpbD2j5syP3w&s" alt="Sign out" width="25" height="25">Выйти из профиля</a>
                 </div>
             {% else %}
                 <div>
-                <a class="navbar-brand" href="/logout"><img src="https://cdn-icons-png.flaticon.com/512/12225/12225935.png" alt="Profile" width="50" height="50">
-                    {{ current_user.name }}</a>
+                <p class="navbar-brand"><img src="https://cdn-icons-png.flaticon.com/512/12225/12225935.png" alt="Profile" width="50" height="50">
+                    {{ current_user.name }}</p>
+                <a class="navbar-brand" href="/logout"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQO1jPMI9JA3ApI4yW6gpyFCoUpbD2j5syP3w&s" alt="Sign out" width="25" height="25">Выйти из профиля</a>
                 <br>
                     <a class="navbar-brand" href="/cart"><img src="https://cdn-icons-png.flaticon.com/512/18/18321.png" alt="Shopping cart" width="25" height="25">Корзина</a>
                 </div>

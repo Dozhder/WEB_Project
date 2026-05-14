@@ -1,5 +1,5 @@
 # flask
-from flask import Flask, request, make_response, render_template, redirect, abort, jsonify, session
+from flask import Flask, request, make_response, render_template, redirect, abort, jsonify, url_for
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_restful import reqparse, abort, Api, Resource
 
@@ -44,6 +44,7 @@ from forms.currier_selection import CurrierSelectionForm
 import users_resource
 import products_resuorce
 import orders_resource
+import eateries_resource
 
 # for .env
 import os
@@ -69,6 +70,9 @@ api.add_resource(products_resuorce.ProductListResource, '/api/products')
 # add order resources
 api.add_resource(orders_resource.OrderResource, '/api/orders/<int:order_id>')
 api.add_resource(orders_resource.OrderListResource, '/api/orders')
+# add eatery resources
+api.add_resource(eateries_resource.EateryResource, '/api/eateries/<int:eatery_id>')
+api.add_resource(eateries_resource.EateryListResource, '/api/eateries')
 
 db_session.global_init('db/data_delivery.sqlite3')
 
@@ -90,7 +94,7 @@ def load_user(user_id):
 
 def main():
     # app.run(host=HOST, port=PORT)
-    serve(app, host=HOST, port=PORT)
+    serve(app, host=HOST, port=PORT, threads=8)
 
 
 @app.route('/')
@@ -197,7 +201,7 @@ def add_to_cart(product_id):
     cart.price += db_sess.get(Product, product_id).price
     db_sess.commit()
     db_sess.close()
-    return redirect("/")
+    return redirect('/')
 
 
 @app.route('/update_cart', methods=['GET', 'POST'])
@@ -228,6 +232,17 @@ def remove_from_cart(product_id):
     cart.products.pop(product_id, None)
     sess.commit()
     sess.close()
+    return redirect('/')
+
+
+@app.route('/remove_from_cart_c/<product_id>')
+def remove_from_cart_c(product_id):
+    sess = db_session.create_session()
+    cart = sess.get(Cart, current_user.cart.id)
+    cart.price -= cart.products[product_id] * sess.get(Product, product_id).price
+    cart.products.pop(product_id, None)
+    sess.commit()
+    sess.close()
     return redirect('/cart')
 
 
@@ -241,19 +256,26 @@ def create_order():
         form.address_eatery.choices.append((eatery.address, eatery.address))
     sess.close()
     if form.validate_on_submit():
-        if form.address_to_order.data == '' and form.addresses_eateries.data == '':
-            return render_template('create_order.html', messege='Не указан адрес', form=form)
-        if form.payment_type.data == 'cash' and form.cash.data == 0:
-            return render_template('create_order.html', messege='Не указан размер оплаты', form=form)
+        if form.address_to_order.data == '' and form.address_eatery.data == '':
+            return render_template('create_order.html', message='Не указан адрес', form=form)
+        if form.payment_type.data == 'cash' and form.cash.data < current_user.cart.price:
+            return render_template('create_order.html', message='Не указан размер оплаты или'
+                                                                ' указанный размер меньше стоимости заказа', form=form)
         if form.type.data == 'delivery':
             address = form.address_to_order.data
         else:
-            address = form.addresses_eateries.data
+            address = form.address_eatery.data
         sess = db_session.create_session()
+        if form.cash.data == 0:
+            payment = current_user.cart.price
+        else:
+            payment = form.cash.data
         order = Order(
             client=current_user.id,
             products=current_user.cart.products,
             price=current_user.cart.price,
+            payment=payment,
+            change=(payment - current_user.cart.price),
             type=form.type.data,
             payment_type=form.payment_type.data,
             address=address
@@ -265,7 +287,7 @@ def create_order():
         sess.commit()
         sess.close()
         return redirect("/")
-    return render_template('create_order.html', form=form)
+    return render_template('create_order.html', form=form, price=current_user.cart.price)
 
 
 @app.route('/add_address', methods=['GET', 'POST'])
@@ -324,7 +346,8 @@ def currier_profile():
         return redirect('/')
     sess = db_session.create_session()
     com_or = len(sess.query(Order).filter(Order.delivery_man == current_user.id, Order.is_complete).all())
-    ncom_or = len(sess.query(Order).filter(Order.delivery_man == current_user.id, not Order.is_complete).all())
+    ncom_or = len(sess.query(Order).filter(Order.delivery_man == current_user.id,
+                                           Order.is_complete == False).all())
     return render_template('currier_profile.html', com_or=com_or, ncom_or=ncom_or)
 
 
@@ -406,6 +429,41 @@ def currier_selection(order_id):
         sess.close()
         return redirect('/')
     return render_template('currier_selection.html', form=form)
+
+
+@app.route('/add_currier', methods=['GET', 'POST'])
+def add_currier():
+    form = RegisterForm()
+    if form.validate_on_submit():
+        if form.password.data != form.password_again.data:
+            return render_template('register.html', title='Регистрация',
+                                   form=form,
+                                   message="Пароли не совпадают")
+        db_sess = db_session.create_session()
+        if db_sess.query(User).filter(User.email == form.email.data).first():
+            db_sess.close()
+            return render_template('register.html', title='Регистрация',
+                                   form=form,
+                                   message="Такой пользователь уже есть")
+        user = User(
+            name=form.name.data,
+            email=form.email.data,
+            access=1,
+            addresses={'addresses': []}
+        )
+        if form.address.data is not None and form.address.data != "":
+            user.addresses['addresses'].append(form.address.data)
+        user.set_password(form.password.data)
+        cart = Cart(user_id=user.id)
+        user.cart = cart
+        eatery = db_sess.get(Eatery, current_user.eatery.id)
+        eatery.staff += f', {user.id}'
+        db_sess.add(user)
+        db_sess.add(cart)
+        db_sess.commit()
+        db_sess.close()
+        return redirect('/login')
+    return render_template('register.html', title='Регистрация', form=form)
 
 
 if __name__ == '__main__':

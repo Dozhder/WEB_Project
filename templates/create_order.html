@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Оформление заказа</h1>
+<h1 align="center">Оформление заказа</h1>
 <form action="" method="post">
     {{ form.hidden_tag() }}
     <p align="center">
@@ -49,8 +49,9 @@
             </p>
         {% endfor %}
     </p>
+    <p align="center">Цена заказа: {{ price }}</p>
     <p align="center">{{ form.submit(type="submit", class="btn btn-primary") }}</p>
-    <div>{{message}}</div>
+    <div align="center">{{message}}</div>
 </form>
 <footer align="center">
     <a href="/add_address" class="delivery" style="display: none" align="center">Добавить адрес доставки</a>

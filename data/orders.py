@@ -16,6 +16,8 @@ class Order(SqlAlchemyBase, UserMixin, SerializerMixin):
     client = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('users.id'))
     products = sqlalchemy.Column(MutableDict.as_mutable(sqlalchemy.JSON)) # format: {id_product: quantity product, ...}
     price = sqlalchemy.Column(sqlalchemy.Integer, default=0)
+    payment = sqlalchemy.Column(sqlalchemy.Integer, default=0)
+    change = sqlalchemy.Column(sqlalchemy.Integer, default=0)
     type = sqlalchemy.Column(sqlalchemy.String)
     payment_type = sqlalchemy.Column(sqlalchemy.String)
     address = sqlalchemy.Column(sqlalchemy.String, nullable=True)

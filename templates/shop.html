@@ -4,6 +4,7 @@
   <h2 style="text-align: center">Products</h2>
   {% for product in products %}
     <div align="center">
+      <a id="{{ product.name }}"></a>
       <h2>{{ product.name }}</h2>
       <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product.name }}">
       <h4>Price: {{ product.price }}</h4>
